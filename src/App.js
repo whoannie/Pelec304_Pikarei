@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import './App.css';
 
-function App() {
+const API_BASE = 'https://pikarei.pythonanywhere.com/api/tasks';
 
+function App() {
   const [tasks, setTasks] = useState([]);
   const [title, setTitle] = useState('');
 
@@ -11,14 +12,13 @@ function App() {
 
   // FETCH TASKS
   const fetchTasks = async () => {
-
-    const response = await fetch(
-      'https://pikarei.pythonanywhere.com/api/tasks/'
-    );
-
-    const data = await response.json();
-
-    setTasks(data);
+    try {
+      const response = await fetch(API_BASE + '/');
+      const data = await response.json();
+      setTasks(data);
+    } catch (error) {
+      console.error('Fetch error:', error);
+    }
   };
 
   useEffect(() => {
@@ -27,12 +27,10 @@ function App() {
 
   // ADD TASK
   const addTask = async () => {
+    if (!title.trim()) return;
 
-    if (title === '') return;
-
-    await fetch(
-        'https://pikarei.pythonanywhere.com/api/tasks//'
-      {
+    try {
+      await fetch(API_BASE + '/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -41,61 +39,58 @@ function App() {
           title: title,
           is_completed: false,
         }),
-      }
-    );
+      });
 
-    setTitle('');
-    fetchTasks();
+      setTitle('');
+      fetchTasks();
+    } catch (error) {
+      console.error('Add task error:', error);
+    }
   };
 
   // DELETE TASK
   const deleteTask = async (id) => {
-
-    await fetch(
-      `http://pikarei.pythonanywhere.com/api/tasks/${id}/`,
-      {
+    try {
+      await fetch(`${API_BASE}/${id}/`, {
         method: 'DELETE',
-      }
-    );
+      });
 
-    fetchTasks();
+      fetchTasks();
+    } catch (error) {
+      console.error('Delete error:', error);
+    }
   };
 
-  // DONE TASK
-  const doneTask = async (id) => {
-
-    await fetch(
-      `http://pikarei.pythonanywhere.com/api/tasks/${id}/`,
-      {
+  // MARK AS DONE
+  const doneTask = async (task) => {
+    try {
+      await fetch(`${API_BASE}/${task.id}/`, {
         method: 'PUT',
-      }
-    );
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: task.title,
+          is_completed: true,
+        }),
+      });
 
-    fetchTasks();
+      fetchTasks();
+    } catch (error) {
+      console.error('Update error:', error);
+    }
   };
 
   return (
-
     <div className="container">
 
       <div className="header">
-
-        <img
-          src={pikachu}
-          alt="Pikachu"
-          className="pikachu-icon"
-        />
-
+        <img src={pikachu} alt="Pikachu" className="pikachu-icon" />
         <h1>Pikachu Task Manager</h1>
-
-        <p className="subtitle">
-          Organize your cute daily missions ⚡💖
-        </p>
-
+        <p className="subtitle">Organize your cute daily missions ⚡💖</p>
       </div>
 
       <div className="form">
-
         <input
           type="text"
           placeholder="Enter your task..."
@@ -103,68 +98,40 @@ function App() {
           onChange={(e) => setTitle(e.target.value)}
         />
 
-        <button onClick={addTask}>
-          Add Task
-        </button>
-
+        <button onClick={addTask}>Add Task</button>
       </div>
 
       <div className="tasks">
 
         {tasks.length === 0 ? (
-
           <div className="empty-state">
-
-            <img
-              src={pikachu}
-              alt="Pikachu"
-            />
-
+            <img src={pikachu} alt="Pikachu" />
             <h3>No tasks yet!</h3>
-
-            <p>
-              Pikachu is waiting for your first mission ⚡
-            </p>
-
+            <p>Pikachu is waiting for your first mission ⚡</p>
           </div>
-
         ) : (
-
           tasks.map((task) => (
-
             <div className="task-card" key={task.id}>
 
               <div className="task-content">
-
-                <p
-                  className={
-                    task.is_completed
-                      ? 'completed'
-                      : ''
-                  }
-                >
+                <p className={task.is_completed ? 'completed' : ''}>
                   {task.title}
                 </p>
 
                 <span>
-                  {task.is_completed
-                    ? 'Completed'
-                    : 'Pending'}
+                  {task.is_completed ? 'Completed' : 'Pending'}
                 </span>
-
               </div>
 
               <div className="actions">
 
                 {!task.is_completed && (
-
                   <button
                     className="done-btn"
-                    onClick={() => doneTask(task.id)}
+                    onClick={() => doneTask(task)}
                   >
                     Done
                   </button>
-
                 )}
 
                 <button
@@ -177,15 +144,11 @@ function App() {
               </div>
 
             </div>
-
           ))
-
         )}
 
       </div>
-
     </div>
-
   );
 }
 
