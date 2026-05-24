@@ -13,7 +13,7 @@ function App() {
   const fetchTasks = async () => {
 
     const response = await fetch(
-      'http://127.0.0.1:8000/api/tasks/'
+      'https://pikarei.pythonanywhere.com/api/tasks/'
     );
 
     const data = await response.json();
@@ -31,7 +31,7 @@ function App() {
     if (title === '') return;
 
     await fetch(
-      'http://127.0.0.1:8000/api/tasks/',
+        'https://pikarei.pythonanywhere.com/api/tasks//'
       {
         method: 'POST',
         headers: {
@@ -52,7 +52,7 @@ function App() {
   const deleteTask = async (id) => {
 
     await fetch(
-      `http://127.0.0.1:8000/api/tasks/${id}/`,
+      `http://pikarei.pythonanywhere.com/api/tasks/${id}/`,
       {
         method: 'DELETE',
       }
@@ -65,7 +65,7 @@ function App() {
   const doneTask = async (id) => {
 
     await fetch(
-      `http://127.0.0.1:8000/api/tasks/${id}/`,
+      `http://pikarei.pythonanywhere.com/api/tasks/${id}/`,
       {
         method: 'PUT',
       }
